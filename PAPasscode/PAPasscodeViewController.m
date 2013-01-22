@@ -238,20 +238,33 @@
             break;
             
         case PasscodeActionEnter:
-            if ([text isEqualToString:_passcode]) {
-                [self resetFailedAttempts];
-                if ([_delegate respondsToSelector:@selector(PAPasscodeViewControllerDidEnterPasscode:)]) {
-                    [_delegate PAPasscodeViewControllerDidEnterPasscode:self];
-                }
-            } else {
-                if (_alternativePasscode && [text isEqualToString:_alternativePasscode]) {
+            
+            if ([_delegate respondsToSelector:@selector(PAPasscodeViewController:shouldAuthenticateWithPasscode:)]) {
+                if ([_delegate PAPasscodeViewController:self shouldAuthenticateWithPasscode:text]) {
                     [self resetFailedAttempts];
-                    if ([_delegate respondsToSelector:@selector(PAPasscodeViewControllerDidEnterAlternativePasscode:)]) {
-                        [_delegate PAPasscodeViewControllerDidEnterAlternativePasscode:self];
+                    if ([_delegate respondsToSelector:@selector(PAPasscodeViewControllerDidEnterPasscode:)]) {
+                        [_delegate PAPasscodeViewControllerDidEnterPasscode:self];
                     }
                 } else {
                     [self handleFailedAttempt];
                     [self showScreenForPhase:0 animated:NO];
+                }
+            } else {
+                if ([text isEqualToString:_passcode]) {
+                    [self resetFailedAttempts];
+                    if ([_delegate respondsToSelector:@selector(PAPasscodeViewControllerDidEnterPasscode:)]) {
+                        [_delegate PAPasscodeViewControllerDidEnterPasscode:self];
+                    }
+                } else {
+                    if (_alternativePasscode && [text isEqualToString:_alternativePasscode]) {
+                        [self resetFailedAttempts];
+                        if ([_delegate respondsToSelector:@selector(PAPasscodeViewControllerDidEnterAlternativePasscode:)]) {
+                            [_delegate PAPasscodeViewControllerDidEnterAlternativePasscode:self];
+                        }
+                    } else {
+                        [self handleFailedAttempt];
+                        [self showScreenForPhase:0 animated:NO];
+                    }
                 }
             }
             break;
