@@ -271,13 +271,25 @@
             
         case PasscodeActionChange:
             if (phase == 0) {
-                if ([text isEqualToString:_passcode]) {
-                    [self resetFailedAttempts];
-                    [self showScreenForPhase:1 animated:YES];
+                
+                if ([_delegate respondsToSelector:@selector(PAPasscodeViewController:shouldAuthenticateWithPasscode:)]) {
+                    if ([_delegate PAPasscodeViewController:self shouldAuthenticateWithPasscode:text]) {
+                        [self resetFailedAttempts];
+                        [self showScreenForPhase:1 animated:YES];
+                    } else {
+                        [self handleFailedAttempt];
+                        [self showScreenForPhase:0 animated:NO];
+                    }
                 } else {
-                    [self handleFailedAttempt];
-                    [self showScreenForPhase:0 animated:NO];
+                    if ([text isEqualToString:_passcode]) {
+                        [self resetFailedAttempts];
+                        [self showScreenForPhase:1 animated:YES];
+                    } else {
+                        [self handleFailedAttempt];
+                        [self showScreenForPhase:0 animated:NO];
+                    }
                 }
+                
             } else if (phase == 1) {
                 _passcode = text;
                 messageLabel.text = @"";
